@@ -37,6 +37,89 @@
   </div>
 
   <script>
+    // API lewat proxy CORS supaya tidak diblokir browser
+    const API = "https://api.allorigins.win/raw?url=https://dramabox.botraiki.biz/api";
+    const contentEl = document.getElementById("content");
+
+    loadTab('latest');
+
+    function setActive(tab) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      const el = document.getElementById('tab-' + tab.split('?')[0]);
+      if (el) el.classList.add('active');
+    }
+
+    async function loadTab(tab) {
+      setActive(tab);
+      contentEl.innerHTML = '<div class="loading">Loading...</div>';
+
+      try {
+        const res = await fetch(`${API}/${tab}`);
+        const data = await res.json();
+
+        let html = '<div id="list">';
+        data.forEach(d => {
+          const cover = d.coverWap || d.bookCover;
+          html += `
+            <div class="card" onclick="openDetail('${d.bookId}')">
+              <img src="${cover}" />
+              <h4>${d.bookName}</h4>
+              <p>${d.introduction || ''}</p>
+            </div>
+          `;
+        });
+        html += '</div>';
+        contentEl.innerHTML = html;
+      } catch (e) {
+        contentEl.innerHTML = '<p style="padding:20px;color:red;">Gagal memuat data. Coba refresh.</p>';
+      }
+    }
+
+    async function openDetail(bookId) {
+      contentEl.innerHTML = '<div class="loading">Loading detail...</div>';
+
+      try {
+        const dRes = await fetch(`${API}/detail?bookId=${bookId}`);
+        const dJson = await dRes.json();
+        const d = dJson.data;
+
+        const eRes = await fetch(`${API}/episodes?bookId=${bookId}`);
+        const episodes = await eRes.json();
+
+        let html = `
+          <div id="detail">
+            <button class="back" onclick="loadTab('latest')">← Kembali</button>
+            <h2>${d.bookName}</h2>
+            <img src="${d.cover}" />
+            <p>${d.introduction}</p>
+            <p><b>Total Episode:</b> ${d.chapterCount}</p>
+            <h3>Episode</h3>
+        `;
+
+        episodes.forEach(ep => {
+          const list = ep.cdnList?.[0]?.videoPathList || [];
+          const video = list.find(v => v.isDefault) || list[0];
+          if (!video) return;
+
+          html += `
+            <div class="episode">
+              <b>${ep.chapterName}</b>
+              <video controls src="${video.videoPath}"></video>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        contentEl.innerHTML = html;
+      } catch (e) {
+        contentEl.innerHTML = '<p style="padding:20px;color:red;">Gagal memuat detail. Coba lagi.</p>';
+      }
+    }
+  </script>
+</body>
+</html>  </div>
+
+  <script>
     const API = "https://dramabox.botraiki.biz/api";
     const contentEl = document.getElementById("content");
 
