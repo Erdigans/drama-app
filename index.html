@@ -1,40 +1,677 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Drama App</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
-    header { background: #e91e63; color: white; padding: 12px; text-align: center; font-size: 18px; }
-    nav { display: flex; justify-content: space-around; background: #fff; border-bottom: 1px solid #ddd; }
-    nav button { flex: 1; padding: 10px; border: none; background: none; font-size: 14px; }
-    nav button.active { color: #e91e63; font-weight: bold; }
-
-    #list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
-    .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; }
-    .card img { width: 100%; height: 220px; object-fit: cover; }
-    .card h4 { margin: 6px; font-size: 14px; }
-
-    #detail { padding: 12px; }
-    .episode { margin-bottom: 12px; }
-    video { width: 100%; max-width: 100%; }
-
-    .back { margin-bottom: 10px; }
-    .loading { text-align: center; padding: 20px; color: gray; }
-  </style>
-</head>
-<body>
-  <header>Drama App</header>
-
-  <nav>
-    <button onclick="loadTab('latest')" id="tab-latest" class="active">Terbaru</button>
-    <button onclick="loadTab('trending')" id="tab-trending">Trending</button>
-    <button onclick="loadTab('for-you')" id="tab-for-you">Rekomendasi</button>
-    <button onclick="loadTab('dubbed?classify=terpopuler')" id="tab-dubbed">Dub Indo</button>
-  </nav>
-
-  <div id="content"></div>
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DramaBox API",
+    "description": "API untuk mengakses konten dari DramaBox - platform streaming drama pendek populer.\n\nAPI ini melakukan scraping dari official DramaBox API (`sapi.dramaboxdb.com`) dengan signature authentication.\n\n### Fitur Utama\n- 🎬 Akses drama terbaru, trending, dan VIP\n- 🔍 Pencarian drama dengan kata kunci\n- 📺 Streaming link untuk semua episode (termasuk episode berbayar/VIP)\n- 🇮🇩 Support drama dengan dubbing Indonesia\n\n---\n\nTertarik memiliki source code lengkap? [Beli Source Code](http://lynk.id/botraiki/5ekyqe1p0p3x)",
+    "version": "2.0.0",
+    "contact": {
+      "name": "Botraiki",
+      "url": "https://lynk.id/botraiki"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://dramabox.botraiki.biz/api",
+      "description": "Production Server"
+    },
+    {
+      "url": "http://localhost:4343/api",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Browse",
+      "description": "Endpoint untuk menjelajahi dan menemukan drama. Data diambil dari berbagai ranking dan rekomendasi DramaBox."
+    },
+    {
+      "name": "Search",
+      "description": "Endpoint untuk pencarian drama menggunakan suggest API dari DramaBox."
+    },
+    {
+      "name": "Detail",
+      "description": "Endpoint untuk mengambil informasi detail drama dan streaming link episode."
+    }
+  ],
+  "paths": {
+    "/latest": {
+      "get": {
+        "tags": [
+          "Browse"
+        ],
+        "summary": "Drama Terbaru",
+        "description": "Mengambil daftar drama yang baru dirilis.\n\n**Source:** `/drama-box/he001/rank` dengan `rankType: 3`\n\n**Response:** Array `rankList` berisi drama dengan informasi:\n- `bookId` - ID unik drama\n- `bookName` - Judul drama\n- `cover` - URL gambar cover\n- `introduction` - Sinopsis singkat\n- `chapterCount` - Jumlah episode\n- `score` - Rating drama",
+        "responses": {
+          "200": {
+            "description": "Array drama terbaru berdasarkan tanggal rilis. Berisi bookId, bookName, coverWap, chapterCount, introduction, tags, tagV3s, protagonist, rankVo, dan shelfTime.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "42000003452",
+                    "bookName": "Tunanganku, Pengawalku",
+                    "coverWap": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000003452/42000003452.jpg?t=1767604508304",
+                    "chapterCount": 90,
+                    "introduction": "Demi membalas budi, Vano Atala kembali ke Negara Utano sebagai pengawal pribadi sekaligus tunangan kontrak Vina Husein, CEO Grup Husein...",
+                    "tags": [
+                      "Balas Dendam",
+                      "Pembalikan Identitas",
+                      "Serangan Balik",
+                      "CEO",
+                      "Kekuatan Khusus",
+                      "Musuh Jadi Kekasih"
+                    ],
+                    "tagV3s": [
+                      {
+                        "tagId": 1337,
+                        "tagName": "Balas Dendam",
+                        "tagEnName": "Revenge"
+                      },
+                      {
+                        "tagId": 1338,
+                        "tagName": "Pembalikan Identitas",
+                        "tagEnName": "Hidden Identity"
+                      },
+                      {
+                        "tagId": 1340,
+                        "tagName": "Serangan Balik",
+                        "tagEnName": "Counterattack"
+                      },
+                      {
+                        "tagId": 1324,
+                        "tagName": "CEO",
+                        "tagEnName": "Billionaire"
+                      }
+                    ],
+                    "protagonist": "Vano Atala",
+                    "rankVo": {
+                      "rankType": 3,
+                      "hotCode": "43.5K",
+                      "sort": 1
+                    },
+                    "shelfTime": "2026-01-09 10:00:00",
+                    "inLibrary": false
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/trending": {
+      "get": {
+        "tags": [
+          "Browse"
+        ],
+        "summary": "Drama Trending",
+        "description": "Mengambil daftar drama yang sedang populer berdasarkan jumlah views dan engagement.\n\n**Source:** `/drama-box/he001/rank` dengan `rankType: 1`\n\n**Response:** Array `rankList` berisi drama trending dengan data lengkap termasuk ranking position.",
+        "responses": {
+          "200": {
+            "description": "Array drama trending berdasarkan popularitas dan engagement. Berisi data lengkap termasuk rankVo dengan hotCode (jumlah views seperti '508K').",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "42000000651",
+                    "bookName": "Suami untuk Tiga Tahun (Sulih Suara)",
+                    "coverWap": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000000651/42000000651.jpg?t=1764042578579",
+                    "chapterCount": 65,
+                    "introduction": "Ezra yang sudah hidup ribuan tahun menepati janji pada muridnya yang sekarat untuk menjaga keluarganya selama tiga tahun...",
+                    "tags": [
+                      "Penyesalan",
+                      "Pembalikan Identitas",
+                      "Penebusan",
+                      "Pemberontak",
+                      "Supranatural",
+                      "Pria Dominan"
+                    ],
+                    "tagV3s": [
+                      {
+                        "tagId": 1658,
+                        "tagName": "Penyesalan",
+                        "tagEnName": "All-Too-Late"
+                      },
+                      {
+                        "tagId": 1338,
+                        "tagName": "Pembalikan Identitas",
+                        "tagEnName": "Hidden Identity"
+                      },
+                      {
+                        "tagId": 1478,
+                        "tagName": "Penebusan",
+                        "tagEnName": "Redemption"
+                      },
+                      {
+                        "tagId": 1323,
+                        "tagName": "Pria Dominan",
+                        "tagEnName": "Powerful Male Lead"
+                      }
+                    ],
+                    "protagonist": "Pemeran Utama: Ezra Lubis, Dea Halim",
+                    "rankVo": {
+                      "rankType": 1,
+                      "hotCode": "508K",
+                      "sort": 1
+                    },
+                    "shelfTime": "2025-11-25 14:42:24",
+                    "inLibrary": false
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/for-you": {
+      "get": {
+        "tags": [
+          "Browse"
+        ],
+        "summary": "Rekomendasi Untukmu",
+        "description": "Mengambil daftar drama rekomendasi dari algoritma DramaBox.\n\n**Source:** `/drama-box/he001/recommendBook`\n\n**Behavior:** \n- Menggunakan pagination random (page 1-2) untuk variasi konten\n- Mengembalikan `recommendList.records` dengan drama yang direkomendasikan",
+        "responses": {
+          "200": {
+            "description": "Array drama rekomendasi dari algoritma DramaBox. Berisi corner badge (Terpopuler), playCount, dan recCopy (ranking text seperti 'Sedang Tren TOP 7').",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "42000002976",
+                    "bookName": "Kupasrahkan Diriku Pada Cintamu (Sulih Suara)",
+                    "coverWap": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000002976/42000002976.jpg?t=1766999911887",
+                    "chapterCount": 54,
+                    "introduction": "Saat datang menemui kekasihnya, Olivia secara tak sengaja bertemu dengan Ellis, seorang CEO miliarder paruh baya...",
+                    "tags": [
+                      "Ketahuan Selingkuh",
+                      "Perbedaan Usia",
+                      "CEO",
+                      "Gadis Naif",
+                      "Cinta Terlarang",
+                      "Modern"
+                    ],
+                    "tagV3s": [
+                      {
+                        "tagId": 1461,
+                        "tagName": "Ketahuan Selingkuh",
+                        "tagEnName": "Caught Cheating"
+                      },
+                      {
+                        "tagId": 1383,
+                        "tagName": "Perbedaan Usia",
+                        "tagEnName": "Age-Gap Love"
+                      },
+                      {
+                        "tagId": 1362,
+                        "tagName": "CEO",
+                        "tagEnName": "Billionaire"
+                      }
+                    ],
+                    "corner": {
+                      "cornerType": 1,
+                      "name": "Terpopuler",
+                      "color": "#F54E96"
+                    },
+                    "rankVo": {
+                      "rankType": 1,
+                      "hotCode": "174K",
+                      "recCopy": "Sedang Tren TOP 7",
+                      "sort": 7
+                    },
+                    "playCount": "3.7M",
+                    "shelfTime": "2025-12-29 18:31:33",
+                    "inLibrary": false
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/vip": {
+      "get": {
+        "tags": [
+          "Browse"
+        ],
+        "summary": "Drama VIP / Theater",
+        "description": "Mengambil daftar drama eksklusif dari halaman VIP/Theater DramaBox.\n\n**Source:** `/drama-box/he001/theater` dengan `channelId: 205`\n\n**Response:** Object dengan berbagai section:\n- Drama VIP terbaru\n- Drama VIP populer\n- Kategori drama eksklusif",
+        "responses": {
+          "200": {
+            "description": "Object dengan bannerList, watchHistory, dan columnVoList. Setiap column berisi title, style, dan bookList dengan drama eksklusif VIP.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "bannerList": [],
+                  "watchHistory": [],
+                  "columnVoList": [
+                    {
+                      "columnId": 502,
+                      "title": "Pilihan Mingguan",
+                      "subTitle": "",
+                      "style": "BIG_PIC_LATERAL",
+                      "bookList": [
+                        {
+                          "bookId": "41000119583",
+                          "bookName": "Cerita Cinta Cheerleader Cantik",
+                          "coverWap": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x1/41x0/410x0/41000119583/41000119583.jpg",
+                          "chapterCount": 57,
+                          "introduction": "Jane adalah maskot tim cheerleader SMA yang sering dibully temannya...",
+                          "tags": [
+                            "Musuh Jadi Kekasih",
+                            "Serangan Balik",
+                            "Sahabat Masa Kecil",
+                            "Modern",
+                            "Romansa"
+                          ],
+                          "tagV3s": [
+                            {
+                              "tagId": 1390,
+                              "tagName": "Musuh Jadi Kekasih",
+                              "tagEnName": "Enemy to Lover"
+                            },
+                            {
+                              "tagId": 1399,
+                              "tagName": "Serangan Balik",
+                              "tagEnName": "Counterattack"
+                            }
+                          ],
+                          "corner": {
+                            "cornerType": 4,
+                            "name": "Anggota Saja",
+                            "color": "#4D65ED"
+                          },
+                          "playCount": "4.3M",
+                          "shelfTime": "2025-08-04 18:41:21",
+                          "inLibrary": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/random": {
+      "get": {
+        "tags": [
+          "Browse"
+        ],
+        "summary": "Drama Video Acak",
+        "description": "Mengambil video drama secara acak, mirip fitur \"For You\" versi video pendek di TikTok.\n\n**Source:** `/drama-box/he001/recommendChannel`\n\n**Response:** Array `chapterList` berisi chapter/episode random dengan:\n- `chapterId` - ID episode\n- `chapterName` - Nama episode\n- `videoUrl` - URL video streaming\n- `cover` - Thumbnail video\n\n**Use Case:** Cocok untuk fitur infinite scroll video pendek.",
+        "responses": {
+          "200": {
+            "description": "Array drama acak untuk infinite scroll. Berisi bookId, bookName, bookCover, introduction, playCount (views seperti '47.9M'), dan tags.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "41000113749",
+                    "bookName": "Rahasia di Balik Orang Tua Sederhana (Sulih Suara)",
+                    "bookCover": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x1/41x0/410x0/41000113749/41000113749.jpg",
+                    "introduction": "Setelah melalui perjuangan yang panjang, pasangan terkaya, Doni Luberto dan Hanna Jiandra, akhirnya berhasil menemukan putra mereka...",
+                    "playCount": "47.9M",
+                    "tags": [
+                      "Pembalikan Identitas",
+                      "Keluarga",
+                      "Intrik Keluarga",
+                      "Anak Hilang",
+                      "Tokoh Legendaris",
+                      "Modern"
+                    ],
+                    "tagV3s": [
+                      {
+                        "tagId": 1338,
+                        "tagName": "Pembalikan Identitas",
+                        "tagEnName": "Hidden Identity"
+                      },
+                      {
+                        "tagId": 1348,
+                        "tagName": "Keluarga",
+                        "tagEnName": "Family Bonds"
+                      },
+                      {
+                        "tagId": 1350,
+                        "tagName": "Intrik Keluarga",
+                        "tagEnName": "Family Intrigue"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/dubbed": {
+      "get": {
+        "tags": [
+          "Browse"
+        ],
+        "summary": "Drama Dubbing Indonesia",
+        "description": "Mengambil daftar drama dengan dubbing bahasa Indonesia.\n\n**Source:** `/drama-box/he001/classify` dengan filter dubbing\n\n**Filter Type:**\n- `type: 2, value: \"1\"` = Filter dubbing Indonesia\n\n**Pagination:** 15 drama per halaman",
+        "parameters": [
+          {
+            "name": "classify",
+            "in": "query",
+            "required": true,
+            "description": "Kategori pengurutan:\n- **terpopuler** (code: 1) - Urutkan berdasarkan popularitas\n- **terbaru** (code: 2) - Urutkan berdasarkan tanggal rilis",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "terpopuler",
+                "terbaru"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Nomor halaman untuk pagination (default: 1). Setiap halaman berisi 15 drama.",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array drama dengan dubbing Indonesia. Berisi 15 drama per halaman dengan data lengkap.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "42000002976",
+                    "bookName": "Kupasrahkan Diriku Pada Cintamu (Sulih Suara)",
+                    "coverWap": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000002976/42000002976.jpg",
+                    "chapterCount": 54,
+                    "introduction": "Saat datang menemui kekasihnya, Olivia secara tak sengaja bertemu dengan Ellis...",
+                    "tags": [
+                      "Ketahuan Selingkuh",
+                      "Perbedaan Usia",
+                      "CEO",
+                      "Gadis Naif"
+                    ],
+                    "tagV3s": [
+                      {
+                        "tagId": 1461,
+                        "tagName": "Ketahuan Selingkuh",
+                        "tagEnName": "Caught Cheating"
+                      },
+                      {
+                        "tagId": 1383,
+                        "tagName": "Perbedaan Usia",
+                        "tagEnName": "Age-Gap Love"
+                      }
+                    ],
+                    "playCount": "3.7M",
+                    "shelfTime": "2025-12-29 18:31:33"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Parameter classify tidak valid. Harus 'terpopuler' atau 'terbaru'."
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Cari Drama",
+        "description": "Mencari drama berdasarkan kata kunci menggunakan suggest API DramaBox.\n\n**Source:** `/drama-box/search/suggest`\n\n**Response:** Array `suggestList` berisi hasil pencarian dengan:\n- `bookId` - ID drama untuk digunakan di endpoint detail/episodes\n- `bookName` - Judul drama (highlighted dengan tag `<em>`)\n- `cover` - URL cover image\n- `author` - Nama author/produser\n- `introduction` - Sinopsis singkat",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "description": "Kata kunci pencarian. Contoh: pewaris, cinta, romantis, CEO",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "pewaris"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array hasil pencarian (suggestList). Berisi drama yang cocok dengan query beserta metadata lengkap.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "42000001693",
+                    "bookName": "Pewaris yang Hilang: Mukjizat Natal",
+                    "introduction": "Dua puluh tahun lalu, Logan kehilangan putranya Troy, dan sejak saat itu tak pernah berhenti untuk mencarinya...",
+                    "author": "",
+                    "cover": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000001693/42000001693.jpg",
+                    "protagonist": "Logan Moore, Troy Parker",
+                    "tagNames": [
+                      "Anak Hilang",
+                      "Serangan Balik",
+                      "Balas Dendam",
+                      "Keluarga",
+                      "CEO",
+                      "Modern"
+                    ],
+                    "bookSource": {
+                      "sceneId": "ovs_vd_suggest_reco",
+                      "expId": "bigdata_rec",
+                      "strategyId": "g7vu1ofq"
+                    },
+                    "inLibrary": false
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Parameter query wajib diisi. Berikan kata kunci pencarian."
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/popular-searches": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Pencarian Populer",
+        "description": "Mengambil daftar drama yang paling banyak dicari pengguna (trending searches).\n\n**Source:** `/drama-box/he001/rank` dengan `rankType: 2`\n\n**Use Case:** \n- Menampilkan suggestion sebelum user mengetik\n- Menampilkan trending topics di halaman search",
+        "responses": {
+          "200": {
+            "description": "Array drama yang paling banyak dicari. Format sama dengan /trending.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "bookId": "42000000651",
+                    "bookName": "Suami untuk Tiga Tahun (Sulih Suara)",
+                    "coverWap": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000000651/42000000651.jpg",
+                    "chapterCount": 65,
+                    "introduction": "Ezra yang sudah hidup ribuan tahun menepati janji pada muridnya...",
+                    "tags": [
+                      "Penyesalan",
+                      "Pembalikan Identitas",
+                      "Penebusan"
+                    ],
+                    "rankVo": {
+                      "rankType": 2,
+                      "hotCode": "120K",
+                      "sort": 1
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Server error atau IP terkena rate limit dari DramaBox. Tunggu beberapa menit sebelum mencoba lagi."
+          }
+        }
+      }
+    },
+    "/detail": {
+      "get": {
+        "tags": [
+          "Detail"
+        ],
+        "summary": "Detail Drama",
+        "description": "Mengambil informasi detail lengkap dari sebuah drama.\n\n**Source:** `webfic.com/webfic/book/detail/v2`\n\n**Response:** Object dengan informasi lengkap:\n- `bookName` - Judul drama\n- `cover` - URL cover high-res\n- `introduction` - Sinopsis lengkap\n- `author` - Nama author/produser\n- `chapterCount` - Total episode\n- `score` - Rating (1-10)\n- `tags` - Genre tags (Romance, Action, dll)\n- `updateTime` - Waktu update terakhir\n- `status` - Status (Ongoing/Completed)",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "query",
+            "required": true,
+            "description": "ID unik drama. Dapatkan dari endpoint search, latest, trending, dll.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "41000116666"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object detail drama lengkap dari webfic.com.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 0,
+                  "msg": "success",
+                  "data": {
+                    "bookId": "41000116666",
+                    "bookName": "Cinta yang Tersisa di Balik Luka",
+                    "cover": "https://hwztchapter.dramaboxdb.com/data/cppartner/4x1/41x0/410x0/41000116666/41000116666.jpg",
+                    "introduction": "Setelah bertahun-tahun berpisah, Anya kembali ke kota kelahirannya dan bertemu kembali dengan cinta pertamanya...",
+                    "author": "DramaBox Studio",
+                    "chapterCount": 88,
+                    "score": "9.2",
+                    "tags": [
+                      "Romansa",
+                      "Drama",
+                      "Cinta Pertama"
+                    ],
+                    "updateTime": "2026-01-10 12:00:00",
+                    "status": 1,
+                    "statusName": "Completed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parameter bookId wajib diisi. Dapatkan bookId dari endpoint browse atau search."
+          },
+          "500": {
+            "description": "Gagal mengambil data dari webfic.com. Server mungkin tidak tersedia atau bookId tidak valid."
+          }
+        }
+      }
+    },
+    "/episodes": {
+      "get": {
+        "tags": [
+          "Detail"
+        ],
+        "summary": "Daftar Episode & Streaming Link",
+        "description": "Mengambil daftar seluruh episode beserta **link streaming** dari sebuah drama, termasuk episode berbayar/VIP.\n\n**Source:** `/drama-box/chapterv2/batch/load`\n\n**Fitur:**\n- ✅ Mengambil SEMUA episode (gratis & VIP)\n- ✅ Token authentication otomatis untuk unlock episode VIP\n- ✅ Hasil di-cache selama 2 jam\n- ✅ Concurrent limit 10 request untuk stabilitas\n\n**Response:** Array episode dengan:\n- `chapterId` - ID episode\n- `chapterIndex` - Nomor urut episode\n- `chapterName` - Judul episode\n- `videoUrl` - **URL streaming video (M3U8)**\n- `cover` - Thumbnail episode\n- `duration` - Durasi dalam detik\n\n**⚠️ Catatan Penting:**\n- Proses membutuhkan waktu **tergantung jumlah episode** (5 episode per batch)\n- Drama 100 episode bisa memakan waktu 30-60 detik\n- Gunakan loading indicator di client",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "query",
+            "required": true,
+            "description": "ID unik drama. Dapatkan dari endpoint search, latest, trending, dll.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "41000116666"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array episode lengkap dengan streaming URL. Setiap episode memiliki cdnList dengan videoPathList berisi multiple quality (1080p/720p/540p). isVipEquity=1 menandakan kualitas khusus VIP.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "chapterId": "594263299",
+                    "chapterIndex": 0,
+                    "isCharge": 0,
+                    "chapterName": "EP 1",
+                    "cdnList": [
+                      {
+                        "cdnDomain": "hwztakavideo.dramaboxdb.com",
+                        "isDefault": 1,
+                        "videoPathList": [
+                          {
+                            "quality": 1080,
+                            "videoPath": "https://hwztakavideo.dramaboxdb.com/.../594263299.1080p.wz.g264.mp4",
+                            "isDefault": 0,
+                            "isVipEquity": 1
+                          },
+                          {
+                            "quality": 720,
+                            "videoPath": "https://hwztakavideo.dramaboxdb.com/.../594263299.720p.narrowv3.mp4",
+                            "isDefault": 1,
+                            "isVipEquity": 0
+                          },
+                          {
+                            "quality": 540,
+                            "videoPath": "https://hwztakavideo.dramaboxdb.com/.../594263299.540p.narrowv2.mp4",
+                            "isDefault": 0,
+                            "isVipEquity": 0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Parameter bookId wajib diisi. Dapatkan bookId dari endpoint browse atau search."
+          },
+          "500": {
+            "description": "Gagal mengambil episode. Penyebab: rate limit, token expired, atau drama tidak ditemukan. Tunggu beberapa menit dan coba lagi."
+          }
+        }
+      }
+    }
+  }
+}  <div id="content"></div>
 
   <script>
     // === KONFIGURASI API (LEWAT PROXY CORS) ===
